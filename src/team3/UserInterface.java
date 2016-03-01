@@ -40,6 +40,8 @@ public class UserInterface {
 	}
 	
 	public enum UserOption {
-		ADD_EDGE
+		ADD_EDGE, REMOVE_EDGE, UNDO_EDGE_REMOVAL,
+		DISPLAY_GRAPH, DISPLAY_SOLUTION,
+		WRITE_GRAPH_TO_FILE
 	}
 }
