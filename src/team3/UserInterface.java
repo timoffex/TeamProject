@@ -1,6 +1,8 @@
 package team3;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 
 public class UserInterface {
@@ -28,15 +30,31 @@ public class UserInterface {
 		return UserOption.ADD_EDGE;
 	}
 	
-	
-	public Scanner getInputFile() {
-		// TODO ask user for input file
+	// Returns a PrintWriter which lets you write to a file
+	public PrintWriter getOutputFile() {
+		// TODO ask user for output file
 		return null;
 	}
 	
-	public Scanner getOutputFile() {
-		// TODO ask user for output file
-		return null;
+	// used to read data from input file
+	public static Scanner openInputFile() {
+		String filename;
+		Scanner userScanner = new Scanner(System.in);
+		Scanner scanner = null;
+
+		System.out.print("Enter the input filename: ");
+		filename = userScanner.nextLine();
+		File file = new File(filename);
+
+		try {
+			scanner = new Scanner(file);
+		} // end try
+		catch (FileNotFoundException fe) {
+			System.out.println("Can't open input file\n");
+			return null; // array of 0 elements
+		} // end catch
+		return scanner;
+
 	}
 	
 	public enum UserOption {
