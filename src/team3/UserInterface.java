@@ -26,7 +26,11 @@ public class UserInterface {
 	/**
 	 * Gets user command and returns the command with its options as a pair P such
 	 * that P.first is the command and P.second is the extra options.
-	 * @return
+	 * <br/><br/>
+	 * If the command is ADD_EDGE, options will be the edge name.<br/>
+	 * If the command is REMOVE_EDGE, options will be the edge name.<br/>
+	 * If the command is WRITE_GRAPH_TO_FILE, options will be the file name.<br/>
+	 * Otherwise, options is null.
 	 */
 	public Pair<UserOption, String> getUserOption() {
 		// TODO present user with a menu and ask what user would like to do
@@ -36,9 +40,17 @@ public class UserInterface {
 		
 		String userInput = system.nextLine();
 		
-		String[] parts = userInput.split(" ");
+		int spaceIndex = userInput.indexOf(' ');
 		
-		String command = parts[0];
+		String command, options;
+		if (spaceIndex == -1) {
+			command = userInput;
+			options = null;
+		} else {
+			command = userInput.substring(0, spaceIndex);
+			options = userInput.substring(spaceIndex+1);
+		}
+		
 		switch (command) {
 		case "u":
 		case "undo":
@@ -50,11 +62,11 @@ public class UserInterface {
 		case "solve":
 			return new Pair<>(UserOption.DISPLAY_SOLUTION, null);
 		case "add":
-			return new Pair<>(UserOption.ADD_EDGE, null);
+			return new Pair<>(UserOption.ADD_EDGE, options);
 		case "remove":
-			return new Pair<>(UserOption.REMOVE_EDGE, null);
+			return new Pair<>(UserOption.REMOVE_EDGE, options);
 		case "save":
-			return new Pair<>(UserOption.WRITE_GRAPH_TO_FILE, null);
+			return new Pair<>(UserOption.WRITE_GRAPH_TO_FILE, options);
 		}
 		
 		// add <city name 1>, <city name 2>
