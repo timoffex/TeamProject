@@ -1,5 +1,8 @@
 package team3;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 
 import team3.codefile.Pair;
@@ -21,7 +24,6 @@ public class UserInterface {
 		system.nextLine();
 		return true;
 	}
-<<<<<<< Updated upstream
 	
 	
 	/**
@@ -80,18 +82,6 @@ public class UserInterface {
 		// TODO Display user options
 	}
 	
-	
-	public Scanner getInputFile() {
-		// TODO ask user for input file
-		return null;
-=======
-
-	public UserOption getUserOption() {
-		// TODO present user with a menu and ask what user would like to do
-		// TODO example: add an edge, remove an edge, undo, display, etc..
-
-		return UserOption.ADD_EDGE;
-	}
 
 	// Returns a PrintWriter which lets you write to a file
 	public PrintWriter getOutputFile() {
@@ -130,19 +120,13 @@ public class UserInterface {
 			return null; // array of 0 elements
 		} // end catch
 		return scanner;
-
->>>>>>> Stashed changes
 	}
 
 	public enum UserOption {
-<<<<<<< Updated upstream
 		ADD_EDGE, REMOVE_EDGE, UNDO_EDGE_REMOVAL,
 		DISPLAY_GRAPH, DISPLAY_SOLUTION,
 		WRITE_GRAPH_TO_FILE,
 		
 		NOOP
-=======
-		ADD_EDGE, REMOVE_EDGE, UNDO_EDGE_REMOVAL, DISPLAY_GRAPH, DISPLAY_SOLUTION, WRITE_GRAPH_TO_FILE
->>>>>>> Stashed changes
 	}
 }
