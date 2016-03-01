@@ -1,6 +1,7 @@
 package team3;
 
 import team3.UserInterface.UserOption;
+import team3.codefile.Pair;
 
 public class Team3Driver {
 	public static void main(String[] args) {
@@ -10,7 +11,7 @@ public class Team3Driver {
 		UserInterface ui = new UserInterface();
 		
 		do {
-			UserOption option = ui.getUserOption();
+			Pair<UserOption, String> option = ui.getUserOption();
 			
 			performAction(option);
 			
@@ -19,8 +20,8 @@ public class Team3Driver {
 	}
 	
 	
-	private static void performAction(UserOption action) {
-		switch (action) {
+	private static void performAction(Pair<UserOption, String> action) {
+		switch (action.first) {
 		case ADD_EDGE:
 			break;
 		}
