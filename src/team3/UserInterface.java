@@ -57,6 +57,9 @@ public class UserInterface {
 			return new Pair<>(UserOption.WRITE_GRAPH_TO_FILE, null);
 		}
 		
+		// add <city name 1>, <city name 2>
+		// -> Pair(ADD_EDGE, "city name 1, city name 2")
+		
 		return new Pair<>(UserOption.NOOP, null);
 	}
 	
