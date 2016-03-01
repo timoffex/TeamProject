@@ -24,36 +24,36 @@ public class UserInterface {
 		system.nextLine();
 		return true;
 	}
-	
-	
+
 	/**
-	 * Gets user command and returns the command with its options as a pair P such
-	 * that P.first is the command and P.second is the extra options.
-	 * <br/><br/>
+	 * Gets user command and returns the command with its options as a pair P
+	 * such that P.first is the command and P.second is the extra options. <br/>
+	 * <br/>
 	 * If the command is ADD_EDGE, options will be the edge name.<br/>
 	 * If the command is REMOVE_EDGE, options will be the edge name.<br/>
-	 * If the command is WRITE_GRAPH_TO_FILE, options will be the file name.<br/>
+	 * If the command is WRITE_GRAPH_TO_FILE, options will be the file name.
+	 * <br/>
 	 * Otherwise, options is null.
 	 */
 	public Pair<UserOption, String> getUserOption() {
 		// TODO present user with a menu and ask what user would like to do
 		// TODO example: add an edge, remove an edge, undo, display, etc..
-		
+
 		displayMenu();
-		
+
 		String userInput = system.nextLine();
-		
+
 		int spaceIndex = userInput.indexOf(' ');
-		
+
 		String command, options;
 		if (spaceIndex == -1) {
 			command = userInput;
 			options = null;
 		} else {
 			command = userInput.substring(0, spaceIndex);
-			options = userInput.substring(spaceIndex+1);
+			options = userInput.substring(spaceIndex + 1);
 		}
-		
+
 		switch (command) {
 		case "u":
 		case "undo":
@@ -71,17 +71,16 @@ public class UserInterface {
 		case "save":
 			return new Pair<>(UserOption.WRITE_GRAPH_TO_FILE, options);
 		}
-		
+
 		// add <city name 1>, <city name 2>
 		// -> Pair(ADD_EDGE, "city name 1, city name 2")
-		
+
 		return new Pair<>(UserOption.NOOP, null);
 	}
-	
+
 	private void displayMenu() {
 		// TODO Display user options
 	}
-	
 
 	// Returns a PrintWriter which lets you write to a file
 	public PrintWriter getOutputFile() {
@@ -123,10 +122,8 @@ public class UserInterface {
 	}
 
 	public enum UserOption {
-		ADD_EDGE, REMOVE_EDGE, UNDO_EDGE_REMOVAL,
-		DISPLAY_GRAPH, DISPLAY_SOLUTION,
-		WRITE_GRAPH_TO_FILE,
-		
+		ADD_EDGE, REMOVE_EDGE, UNDO_EDGE_REMOVAL, DISPLAY_GRAPH, DISPLAY_SOLUTION, WRITE_GRAPH_TO_FILE,
+
 		NOOP
 	}
 }
