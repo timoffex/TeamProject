@@ -5,17 +5,14 @@ import team3.codefile.Pair;
 
 public class Team3Driver {
 	public static void main(String[] args) {
-		System.out.println("This is our main class.");
-		
-		
 		UserInterface ui = new UserInterface();
+		
+		ui.displayHello();
 		
 		do {
 			Pair<UserOption, String> option = ui.getUserOption();
 			
 			performAction(option);
-			
-			ui.displayHello();
 		} while (ui.userWantsToContinue());
 	}
 	

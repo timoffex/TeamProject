@@ -17,6 +17,7 @@ public class UserInterface {
 
 	public void displayHello() {
 		System.out.println("Hello");
+		System.out.println();
 	}
 
 	public boolean userWantsToContinue() {
@@ -64,8 +65,10 @@ public class UserInterface {
 		case "s":
 		case "solve":
 			return new Pair<>(UserOption.DISPLAY_SOLUTION, null);
+		case "a":
 		case "add":
 			return new Pair<>(UserOption.ADD_EDGE, options);
+		case "r":
 		case "remove":
 			return new Pair<>(UserOption.REMOVE_EDGE, options);
 		case "save":
@@ -80,6 +83,14 @@ public class UserInterface {
 
 	private void displayMenu() {
 		// TODO Display user options
+		System.out.println("\nOptions:");
+		System.out.println("undo|u                         Undo remove command.");
+		System.out.println("display|d                      Display the graph.");
+		System.out.println("solve|s                        Solve the graph and display the solution.");
+		System.out.println("add|a <vertex 1> <vertex 2>    Add an edge between vertex 1 and vertex 2 to the graph. Adds vertices if necessary.");
+		System.out.println("remove|r <vertex 1> <vertex 2> Remove the edge between the specified vertices.");
+		System.out.println("save <path to file>            Save the graph to a file.");
+		System.out.print("Enter command: ");
 	}
 
 	// Returns a PrintWriter which lets you write to a file
