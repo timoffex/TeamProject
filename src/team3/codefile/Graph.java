@@ -1,10 +1,7 @@
 package team3.codefile;
 import java.util.*;
 import java.util.Map.Entry;
-interface Visitor<T>
-{
-    public void visit(T obj);
-}
+
 
 // --- assumes definition of simple class Pair<E, F>
 
@@ -255,6 +252,28 @@ public class Graph<E>
    public void depthFirstTraversalHelper(Vertex<E> startVertex, Visitor<E> visitor)
    {
         // YOU COMPLETE THIS (USE THE ALGORITHM GIVEN FOR LESSON 11 EXERCISE)
+	   unvisitVertices();
+	   
+	   LinkedStack<Vertex<E>> toVisit = new LinkedStack<>();
+	   toVisit.push(startVertex);
+	   
+	   while (!toVisit.isEmpty()) {
+		   Vertex<E> v = toVisit.pop();
+		   
+		   if (v.isVisited())
+			   continue;
+		   
+		   visitor.visit(v.getData());
+		   v.visit();
+		   
+		   Iterator<Pair<Vertex<E>, Double>> itr = v.adjList.values().iterator();
+		   while (itr.hasNext()) {
+			   Vertex<E> neighbor = itr.next().first;
+			   
+			   if (!neighbor.isVisited())
+				   toVisit.push(neighbor);
+		   }
+	   }
    }
 
 
