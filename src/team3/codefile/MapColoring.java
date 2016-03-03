@@ -43,6 +43,9 @@ public class MapColoring<E> extends Graph<E> {
 			while (!toVisit.isEmpty()) {
 				Vertex<E> next = toVisit.dequeue();
 				
+				if (next.isVisited())
+					continue;
+				
 				next.visit();
 				assignColor(next);
 				
