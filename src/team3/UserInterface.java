@@ -40,8 +40,8 @@ public class UserInterface {
 		// TODO present user with a menu and ask what user would like to do
 		// TODO example: add an edge, remove an edge, undo, display, etc..
 
-		displayMenu();
 
+		System.out.print("Enter command: ");
 		String userInput = system.nextLine();
 
 		int spaceIndex = userInput.indexOf(' ');
@@ -73,6 +73,9 @@ public class UserInterface {
 			return new Pair<>(UserOption.REMOVE_EDGE, options);
 		case "save":
 			return new Pair<>(UserOption.WRITE_GRAPH_TO_FILE, options);
+		case "q":
+		case "quit":
+			return new Pair<>(UserOption.QUIT, null);
 		}
 
 		// add <city name 1>, <city name 2>
@@ -81,16 +84,18 @@ public class UserInterface {
 		return new Pair<>(UserOption.NOOP, null);
 	}
 
-	private void displayMenu() {
-		// TODO Display user options
+	public void displayHelp() {
 		System.out.println("\nOptions:");
-		System.out.println("undo|u                         Undo remove command.");
-		System.out.println("display|d                      Display the graph.");
-		System.out.println("solve|s                        Solve the graph and display the solution.");
-		System.out.println("add|a <vertex 1> <vertex 2>    Add an edge between vertex 1 and vertex 2 to the graph. Adds vertices if necessary.");
-		System.out.println("remove|r <vertex 1> <vertex 2> Remove the edge between the specified vertices.");
-		System.out.println("save <path to file>            Save the graph to a file.");
-		System.out.print("Enter command: ");
+		System.out.println("undo|u                           Undo remove command.");
+		System.out.println("display|d                        Display the graph.");
+		System.out.println("solve|s                          Solve the graph and display the solution.");
+		System.out.println("add|a <vertex 1> <vertex 2>      Add an edge between vertex 1 and vertex 2 to the graph. Adds vertices if necessary.");
+		System.out.println("remove|r <vertex 1> <vertex 2>   Remove the edge between the specified vertices.");
+		System.out.println("save <path to file>              Save the graph to a file.");
+		System.out.println("help                             Display this menu.");
+		System.out.println("quit                             Quit program.");
+		
+		System.out.println();
 	}
 
 	// Returns a PrintWriter which lets you write to a file
@@ -134,7 +139,7 @@ public class UserInterface {
 
 	public enum UserOption {
 		ADD_EDGE, REMOVE_EDGE, UNDO_EDGE_REMOVAL, DISPLAY_GRAPH, DISPLAY_SOLUTION, WRITE_GRAPH_TO_FILE,
-
+		QUIT,
 		NOOP
 	}
 }
