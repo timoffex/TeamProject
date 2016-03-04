@@ -37,12 +37,8 @@ public class UserInterface {
 	 * Otherwise, options is null.
 	 */
 	public Pair<UserOption, String> getUserOption() {
-		// TODO present user with a menu and ask what user would like to do
-		// TODO example: add an edge, remove an edge, undo, display, etc..
-
-
-		System.out.print("Enter command: ");
-		String userInput = system.nextLine();
+		System.out.print("> ");
+		String userInput = system.nextLine().trim();
 
 		int spaceIndex = userInput.indexOf(' ');
 
@@ -55,16 +51,21 @@ public class UserInterface {
 			options = userInput.substring(spaceIndex + 1);
 		}
 
+		while (command.equals("help")) {
+			displayHelp();
+			command = ask("> ");
+		}
+		
 		switch (command) {
 		case "u":
 		case "undo":
-			return new Pair<>(UserOption.UNDO_EDGE_REMOVAL, null);
+			return new Pair<>(UserOption.UNDO_EDGE_REMOVAL, options);
 		case "d":
 		case "display":
-			return new Pair<>(UserOption.DISPLAY_GRAPH, null);
+			return new Pair<>(UserOption.DISPLAY_GRAPH, options);
 		case "s":
 		case "solve":
-			return new Pair<>(UserOption.DISPLAY_SOLUTION, null);
+			return new Pair<>(UserOption.DISPLAY_SOLUTION, options);
 		case "a":
 		case "add":
 			return new Pair<>(UserOption.ADD_EDGE, options);
@@ -75,7 +76,7 @@ public class UserInterface {
 			return new Pair<>(UserOption.WRITE_GRAPH_TO_FILE, options);
 		case "q":
 		case "quit":
-			return new Pair<>(UserOption.QUIT, null);
+			return new Pair<>(UserOption.QUIT, options);
 		}
 
 		// add <city name 1>, <city name 2>
@@ -84,6 +85,16 @@ public class UserInterface {
 		return new Pair<>(UserOption.NOOP, null);
 	}
 
+	/**
+	 * Prompts a user and returns the response.
+	 * @param prompt - Message to prompt with.
+	 * @return User input.
+	 */
+	public String ask(String prompt) {
+		System.out.print(prompt);
+		return system.nextLine();
+	}
+	
 	public void displayHelp() {
 		System.out.println("\nOptions:");
 		System.out.println("undo|u                           Undo remove command.");
@@ -114,6 +125,8 @@ public class UserInterface {
 			System.out.println("Can't open output file\n");
 		}
 
+		userScanner.close();
+		
 		return writer;
 	}
 
@@ -132,8 +145,12 @@ public class UserInterface {
 		} // end try
 		catch (FileNotFoundException fe) {
 			System.out.println("Can't open input file\n");
+			userScanner.close();
 			return null; // array of 0 elements
 		} // end catch
+		
+		userScanner.close();
+		
 		return scanner;
 	}
 

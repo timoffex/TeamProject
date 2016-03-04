@@ -7,9 +7,10 @@ import team3.codefile.Visitor;
 
 public class Team3Driver {
 	private static MapColoring<String> graph;
+	private static UserInterface ui;
 	
 	public static void main(String[] args) {
-		UserInterface ui = new UserInterface();
+		ui = new UserInterface();
 		graph = new MapColoring<>();
 		
 		ui.displayHello();
@@ -28,7 +29,7 @@ public class Team3Driver {
 		switch (action.first) {
 		case ADD_EDGE: addEdge(action.second); break;
 		case REMOVE_EDGE: removeEdge(action.second); break;
-		case DISPLAY_GRAPH: displayGraph(); break;
+		case DISPLAY_GRAPH: displayGraph(action.second); break;
 		
 		// If we're here, there is a command that wasn't implemented yet.
 		default:
@@ -60,12 +61,38 @@ public class Team3Driver {
 		}
 	}
 	
-	private static void displayGraph() {
-		graph.depthFirstTraversal("START", new Visitor<String>() {
+	private static void displayGraph(String options) {
+		String startNode;
+		boolean depthFirst;
+		
+//		if (options == null || options.isEmpty()) {
+		if (true) { // temporary
+			String depthString = ui.ask("Depth first or breadth first? (d/b): ");
+			
+			do {
+				if (depthString.equalsIgnoreCase("d") || depthString.equalsIgnoreCase("depth")) {
+					depthFirst = true;
+					break;
+				} else if (depthString.equalsIgnoreCase("b") || depthString.equalsIgnoreCase("breadth")) {
+					depthFirst = false;
+					break;
+				}
+			} while (true);
+			
+			
+			startNode = ui.ask("Enter start node: ");
+		}
+		
+		Visitor<String> visitor = new Visitor<String>() {
 			public void visit(String s) {
 				System.out.println(s);
 			}
-		});
+		};
+		
+		if (depthFirst)
+			graph.depthFirstTraversal(startNode, visitor);
+		else
+			graph.breadthFirstTraversal(startNode, visitor);
 	}
 
 }
