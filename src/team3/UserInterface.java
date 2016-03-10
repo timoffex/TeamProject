@@ -72,11 +72,13 @@ public class UserInterface {
 		case "r":
 		case "remove":
 			return new Pair<>(UserOption.REMOVE_EDGE, options);
-		case "save":
-			return new Pair<>(UserOption.WRITE_GRAPH_TO_FILE, options);
 		case "q":
 		case "quit":
 			return new Pair<>(UserOption.QUIT, options);
+		case "load":
+			return new Pair<>(UserOption.LOAD_GRAPH_FROM_FILE, options);
+		case "save":
+			return new Pair<>(UserOption.WRITE_GRAPH_TO_FILE, options);
 		}
 
 		// add <city name 1>, <city name 2>
@@ -103,6 +105,7 @@ public class UserInterface {
 		System.out.println("add|a <vertex 1> <vertex 2>      Add an edge between vertex 1 and vertex 2 to the graph. Adds vertices if necessary.");
 		System.out.println("remove|r <vertex 1> <vertex 2>   Remove the edge between the specified vertices.");
 		System.out.println("save <path to file>              Save the graph to a file.");
+		System.out.println("load <path to file>              Load the graph from a file.");
 		System.out.println("help                             Display this menu.");
 		System.out.println("quit                             Quit program.");
 		
@@ -155,7 +158,13 @@ public class UserInterface {
 	}
 
 	public enum UserOption {
-		ADD_EDGE, REMOVE_EDGE, UNDO_EDGE_REMOVAL, DISPLAY_GRAPH, DISPLAY_SOLUTION, WRITE_GRAPH_TO_FILE,
+		ADD_EDGE, REMOVE_EDGE, UNDO_EDGE_REMOVAL, DISPLAY_GRAPH, WRITE_GRAPH_TO_FILE,
+		LOAD_GRAPH_FROM_FILE,
+		
+		DISPLAY_MIN_COLORS,
+		DISPLAY_COLORS,
+		DISPLAY_SOLUTION,
+		
 		QUIT,
 		NOOP
 	}

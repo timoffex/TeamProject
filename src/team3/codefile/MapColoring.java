@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 
 public class MapColoring<E> extends Graph<E> {
@@ -22,7 +24,7 @@ public class MapColoring<E> extends Graph<E> {
 	 */
 	private int minColors = 0;
 	
-	public int getMinimumNumberOfColors() {
+	private void solveProblem() {
 		minColors = 1;
 		vertexColors.clear();
 		unvisitVertices();
@@ -32,7 +34,7 @@ public class MapColoring<E> extends Graph<E> {
 		
 		LinkedQueue<Vertex<E>> toVisit = new LinkedQueue<>();
 		
-		Vertex<E> unvisited = getUnvisitedVertex();
+		Vertex<E> unvisited;
 		
 		// Repeat until all vertices are visited. Outer loop
 		// makes sure that separate connected components are
@@ -57,9 +59,26 @@ public class MapColoring<E> extends Graph<E> {
 						toVisit.enqueue(neighbor);
 			}
 		}
-		
-		
+	}
+	
+	public int getMinimumNumberOfColors() {
+		solveProblem();
 		return minColors;
+	}
+	
+	public Map<E, Integer> getColors() {
+		solveProblem();
+		
+		Map<E, Integer> colors = new HashMap<>();
+		
+		Iterator<Entry<Vertex<E>, Integer>> itr = vertexColors.entrySet().iterator();
+		
+		while (itr.hasNext()) {
+			Entry<Vertex<E>, Integer> entry = itr.next();
+			colors.put(entry.getKey().getData(), entry.getValue());
+		}
+		
+		return colors;
 	}
 	
 	
@@ -111,7 +130,7 @@ public class MapColoring<E> extends Graph<E> {
 	 * @return An unvisited vertex or null if all vertices are visited.
 	 */
 	private Vertex<E> getUnvisitedVertex() {
-		Iterator<Vertex<E>> itr = vertexColors.keySet().iterator();
+		Iterator<Vertex<E>> itr = vertexSet.values().iterator();
 		
 		while (itr.hasNext()) {
 			Vertex<E> v = itr.next();
@@ -124,4 +143,64 @@ public class MapColoring<E> extends Graph<E> {
 	}
 	
 	
+	
+	
+	
+	
+	public List<E> getNeighborsOfData(E data) {
+		Vertex<E> vertex = vertexSet.get(data);
+		if (vertex == null) return null;
+		
+		List<Vertex<E>> neighbors = getNeighbors(vertex);
+		
+		List<E> dataNeighbors = new ArrayList<>();
+		
+		for (Vertex<E> v : neighbors)
+			dataNeighbors.add(v.data);
+		
+		return dataNeighbors;
+		
+	}
+	
+	public Vertex<E> getAnyVertex() {
+		Iterator<Vertex<E>> itr = vertexSet.values().iterator();
+		return itr.next();
+	}
+	
+	public E getAnyData() {
+		Iterator<Vertex<E>> itr = vertexSet.values().iterator();
+		return itr.next().getData();
+	}
+	
+	public Iterator<E> dataIterator() {
+		return new DataIterator(vertexSet.values().iterator());
+	}
+	
+	private class DataIterator implements Iterator<E> {
+		private Iterator<Vertex<E>> vItr;
+		
+		public DataIterator(Iterator<Vertex<E>> itr) {
+			vItr = itr;
+		}
+		
+		@Override
+		public boolean hasNext() {
+			return vItr.hasNext();
+		}
+
+		@Override
+		public E next() {
+			return vItr.next().getData();
+		}
+
+		@Override
+		public void remove() {
+			throw new Error("Unimplemented method!");
+		}
+
+		@Override
+		public void forEachRemaining(Consumer<? super E> action) {
+			throw new Error("Unimplemented method!");
+		}
+	}
 }

@@ -1,0 +1,12 @@
+Transfiguration	Charms
+Transfiguration Wizardry
+Potions Astrology
+Potions Charms
+Potions Wizardry
+Herbology Wizardry
+Charms Transfiguration
+Charms Potions
+Wizardry Transfiguration
+Wizardry Potions
+Wizardry Herbology
+Astrology Potions
