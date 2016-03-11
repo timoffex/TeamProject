@@ -37,7 +37,7 @@ public class UserInterface {
 	 * Otherwise, options is null.
 	 */
 	public Pair<UserOption, String> getUserOption() {
-		System.out.print("> ");
+		System.out.println("Enter command: ");
 		String userInput = system.nextLine().trim();
 
 		int spaceIndex = userInput.indexOf(' ');
@@ -53,7 +53,7 @@ public class UserInterface {
 
 		while (command.equals("help")) {
 			displayHelp();
-			command = ask("> ");
+			command = ask("Enter command: \n");
 		}
 		
 		switch (command) {

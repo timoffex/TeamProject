@@ -26,7 +26,7 @@ public class GraphWindow extends JFrame {
 		int x = screenSize.width/2 - width/2;
 		int y = screenSize.height/2 - height/2;
 		
-		setBounds(x, y, width, height);
+		setBounds(x+200, y, width, height);
 	}
 	
 }

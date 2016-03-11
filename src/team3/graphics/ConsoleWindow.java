@@ -1,25 +1,44 @@
 package team3.graphics;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JFrame;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.text.DefaultCaret;
 
 public class ConsoleWindow extends JFrame {
 	private static final long serialVersionUID = 1L;
 	
 	private JTextArea consoleOutput;
 	private JTextField consoleInput;
+	
+	private JScrollPane outputScroll;
 
+	
+	private List<String> previousInputs = new ArrayList<>();
+	private int currentEntry = 0;
+	private boolean currentInputInList = false;
+	
+	
 	public ConsoleWindow() {
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		
@@ -30,13 +49,69 @@ public class ConsoleWindow extends JFrame {
 		
 		setBounds(x, y, width, height);
 		
-		add(consoleOutput = new JTextArea());
-		add(consoleInput = new JTextField());
+		consoleOutput = new JTextArea();
+		consoleOutput.setLineWrap(true);
+		consoleOutput.setWrapStyleWord(true);
+		consoleOutput.setEditable(false);
 		
-		consoleInput.setEnabled(false);
+		((DefaultCaret) consoleOutput.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+		
+		outputScroll = new JScrollPane(consoleOutput, 
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		
+		setLayout(new BorderLayout());
+		add(outputScroll, BorderLayout.CENTER);
+		add(consoleInput = new JTextField(), BorderLayout.PAGE_END);
+		
 		consoleInput.addActionListener(new InputActionListener());
 		
+		
+		// Add listeners to consoleInput to detect UP/DOWN key strokes.
+		Action upAction = new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (previousInputs.size() == 0)
+					return;
+				
+				int newIndex = (currentEntry - 1) % previousInputs.size();
+				if (newIndex < 0) newIndex += previousInputs.size();
+				
+				updateInputField(newIndex);
+			}
+		};
+		
+		Action downAction = new AbstractAction() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (previousInputs.size() == 0)
+					return;
+				
+				updateInputField((currentEntry + 1) % previousInputs.size());
+			}
+		};
+		
+		KeyStroke upKey = KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0);
+		KeyStroke downKey = KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0);
+
+		consoleInput.getInputMap().put(upKey, "up");
+		consoleInput.getInputMap().put(downKey, "down");
+		consoleInput.getActionMap().put("up", upAction);
+		consoleInput.getActionMap().put("down", downAction);
+		
+		
 		setVisible(true);
+	}
+	
+	private void updateInputField(int newIndex) {
+		if (!currentInputInList) {
+			previousInputs.add(consoleInput.getText());
+			currentInputInList = true;
+		} else if (currentEntry == previousInputs.size()-1)
+			previousInputs.set(currentEntry, consoleInput.getText());
+		
+		consoleInput.setText(previousInputs.get(newIndex));
+		currentEntry = newIndex;
 	}
 	
 	
@@ -44,9 +119,12 @@ public class ConsoleWindow extends JFrame {
 		consoleOutput.append(str + "\n");
 	}
 	
+	public void print(String str) {
+		consoleOutput.append(str);
+	}
+	
 	public String getLine() {
-		consoleInput.setEnabled(true);
-		
+	
 		// wait for enter key to be pressed
 		try {
 			synchronized (consoleInput) {
@@ -56,11 +134,16 @@ public class ConsoleWindow extends JFrame {
 			e.printStackTrace();
 		}
 		
-		consoleInput.setEnabled(false);
+		if (currentInputInList)
+			previousInputs.remove(previousInputs.size()-1);
+		
 		
 		String input = consoleInput.getText();
+		previousInputs.add(input);
+		currentInputInList = false;
+		
 		consoleInput.setText("");
-		return input;
+		return input + "\n";
 	}
 	
 	private class InputActionListener implements ActionListener {
@@ -71,38 +154,4 @@ public class ConsoleWindow extends JFrame {
 			}
 		}
 	}
-}
-
-// Copied from http://stackoverflow.com/questions/14706674/system-out-println-to-jtextarea
-class JTextAreaOutputStream extends OutputStream
-{
-    private final JTextArea destination;
-
-    public JTextAreaOutputStream (JTextArea destination)
-    {
-        if (destination == null)
-            throw new IllegalArgumentException ("Destination is null");
-
-        this.destination = destination;
-    }
-
-    @Override
-    public void write(byte[] buffer, int offset, int length) throws IOException
-    {
-        final String text = new String (buffer, offset, length);
-        SwingUtilities.invokeLater(new Runnable ()
-            {
-                @Override
-                public void run() 
-                {
-                    destination.append (text);
-                }
-            });
-    }
-
-    @Override
-    public void write(int b) throws IOException
-    {
-        write (new byte [] {(byte)b}, 0, 1);
-    }
 }

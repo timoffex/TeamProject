@@ -2,10 +2,17 @@ package team3;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
+
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
 import team3.UserInterface.UserOption;
 import team3.codefile.MapColoring;
@@ -22,11 +29,17 @@ public class Team3Driver {
 	private static GraphWindow display;
 	
 	public static void main(String[] args) {
+		
+		// This should be done first.
+		console = new ConsoleWindow();
+		System.setOut(new PrintStream(new ConsoleOutputStream(console)));
+		System.setIn(new ConsoleInputStream(console));
+		
+		
 		ui = new UserInterface();
 		graph = new MapColoring<>();
-		
-		console = new ConsoleWindow();
 		display = new GraphWindow(graph);
+		
 		
 		ui.displayHello();
 		ui.displayHelp();
@@ -37,6 +50,9 @@ public class Team3Driver {
 			
 			option = ui.getUserOption();
 		}
+		
+		// Close everything!
+		System.exit(0);
 	}
 	
 	
@@ -167,3 +183,73 @@ public class Team3Driver {
 		}
 	}
 }
+
+/**
+ * Used to redirect System.out to custom console window.
+ */
+class ConsoleOutputStream extends OutputStream {
+	private final ConsoleWindow console;
+	
+	ConsoleOutputStream(ConsoleWindow cons) {
+		console = cons;
+	}
+	
+	@Override
+	public void write(byte[] buffer, int offset, int length) throws IOException {
+		String text = new String(buffer, offset, length);
+		console.print(text);
+	}
+
+	@Override
+	public void write(int b) throws IOException {
+		write(new byte[] { (byte) b }, 0, 1);
+	}
+}
+
+/**
+ * Used to redirect System.out to custom console window.
+ */
+class ConsoleInputStream extends InputStream {
+	private final ConsoleWindow console;
+	private String lastLine;
+	
+	public ConsoleInputStream(ConsoleWindow cons) {
+		console = cons;
+	}
+	
+	@Override
+	public int read() throws IOException {
+		updateLastLine();
+		
+		byte[] bytes = lastLine.getBytes();
+		
+		lastLine = lastLine.substring(1);
+		
+		return bytes[0];
+	}
+	
+	@Override
+	public int read(byte[] b, int off, int len) throws IOException {
+		updateLastLine();
+		
+		byte[] bytes = lastLine.getBytes();
+		
+		for (int i = 0; i < bytes.length; i++)
+			b[off + i] = bytes[i];
+		
+		lastLine = "";
+		
+		return bytes.length;
+	}
+	
+	@Override
+	public int read(byte[] b) throws IOException {
+		return read(b, 0, b.length);
+	}
+	
+	private void updateLastLine() {
+		if (lastLine == null || lastLine.length() == 0)
+			lastLine = console.getLine();
+	}
+}
+
