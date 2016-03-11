@@ -162,6 +162,10 @@ public class MapColoring<E> extends Graph<E> {
 		
 	}
 	
+	public boolean areNodesConnected(E d1, E d2) {
+		return vertexSet.get(d1).adjList.containsKey(d2);
+	}
+	
 	public Vertex<E> getAnyVertex() {
 		Iterator<Vertex<E>> itr = vertexSet.values().iterator();
 		return itr.next();

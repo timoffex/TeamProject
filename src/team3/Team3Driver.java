@@ -60,9 +60,12 @@ public class Team3Driver {
 		switch (action.first) {
 		case ADD_EDGE: addEdge(action.second); break;
 		case REMOVE_EDGE: removeEdge(action.second); break;
-		case DISPLAY_GRAPH: displayGraph(action.second); break;
 		case LOAD_GRAPH_FROM_FILE: loadGraph(action.second); break;
 		case DISPLAY_SOLUTION: displaySolution(action.second); break;
+		
+		// Removing this for now because of visual display.
+//		case DISPLAY_GRAPH: displayGraph(action.second); break;
+		
 		
 		// If we're here, there is a command that wasn't implemented yet.
 		default:
@@ -73,6 +76,11 @@ public class Team3Driver {
 	
 	
 	private static void addEdge(String args) {
+		if (args == null) {
+			System.out.println("Usage: add <v1> <v2>  OR  a <v1> <v2>");
+			return;
+		}
+		
 		String[] vertices = args.split(" ");
 		
 		if (vertices.length != 2)
@@ -80,11 +88,16 @@ public class Team3Driver {
 		else {
 			graph.addEdge(vertices[0], vertices[1], 1);
 			graph.addEdge(vertices[1], vertices[0], 1);
-			display.repaint();
+			display.recomputeNodePlacements();
 		}
 	}
 	
 	private static void removeEdge(String args) {
+		if (args == null) {
+			System.out.println("Usage: remove <v1> <v2>  OR  r <v1> <v2>");
+			return;
+		}
+		
 		String[] vertices = args.split(" ");
 		
 		if (vertices.length != 2)
@@ -92,11 +105,16 @@ public class Team3Driver {
 		else {
 			graph.remove(vertices[0], vertices[1]);
 			graph.remove(vertices[1], vertices[0]);
-			display.repaint();
+			display.recomputeNodePlacements();
 		}
 	}
 	
 	private static void loadGraph(String options) {
+		if (options == null) {
+			System.out.println("No file name given. Usage: load <file name>");
+			return;
+		}
+		
 		graph.clear();
 		
 		try {
@@ -117,7 +135,7 @@ public class Team3Driver {
 				graph.addEdge(vertices[0], vertices[1], 1);
 			}
 
-			display.repaint();
+			display.recomputeNodePlacements();
 			System.out.println("Loaded the graph!");
 			
 			in.close();
@@ -126,6 +144,7 @@ public class Team3Driver {
 		}
 	}
 	
+	/* UNUSED FOR NOW */
 	private static void displayGraph(String options) {
 		String startNode;
 		boolean depthFirst;

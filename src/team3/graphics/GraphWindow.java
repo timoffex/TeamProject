@@ -9,9 +9,11 @@ import team3.codefile.MapColoring;
 
 public class GraphWindow extends JFrame {
 	private static final long serialVersionUID = 1L;
+	
+	private GraphPanel panel;
 
 	public GraphWindow(MapColoring<String> graph) {
-		add(new GraphPanel(graph));
+		add(panel = new GraphPanel(graph));
 		
 		center();
 		
@@ -29,4 +31,8 @@ public class GraphWindow extends JFrame {
 		setBounds(x+200, y, width, height);
 	}
 	
+	
+	public void recomputeNodePlacements() {
+		panel.recomputeNodePlacements();
+	}
 }

@@ -37,32 +37,33 @@ public class UserInterface {
 	 * Otherwise, options is null.
 	 */
 	public Pair<UserOption, String> getUserOption() {
-		System.out.println("Enter command: ");
-		String userInput = system.nextLine().trim();
-
-		int spaceIndex = userInput.indexOf(' ');
-
 		String command, options;
-		if (spaceIndex == -1) {
-			command = userInput;
-			options = null;
-		} else {
-			command = userInput.substring(0, spaceIndex);
-			options = userInput.substring(spaceIndex + 1);
-		}
+		String userInput;
 
-		while (command.equals("help")) {
-			displayHelp();
-			command = ask("Enter command: \n");
-		}
+		
+		do {
+			userInput = ask("Enter command: ");
+
+			int spaceIndex = userInput.indexOf(' ');
+			if (spaceIndex == -1) {
+				command = userInput;
+				options = null;
+			} else {
+				command = userInput.substring(0, spaceIndex);
+				options = userInput.substring(spaceIndex + 1);
+			}
+	
+			
+			if (command.equals("help")) 
+				displayHelp();
+			else break;
+			
+		} while (true);
+		
 		
 		switch (command) {
-		case "u":
 		case "undo":
 			return new Pair<>(UserOption.UNDO_EDGE_REMOVAL, options);
-		case "d":
-		case "display":
-			return new Pair<>(UserOption.DISPLAY_GRAPH, options);
 		case "s":
 		case "solve":
 			return new Pair<>(UserOption.DISPLAY_SOLUTION, options);
@@ -94,13 +95,18 @@ public class UserInterface {
 	 */
 	public String ask(String prompt) {
 		System.out.print(prompt);
-		return system.nextLine();
+		
+		// Needed because external console window separates input field from text output area.
+		String line = system.nextLine();
+		System.out.println(line);
+		
+		
+		return line;
 	}
 	
 	public void displayHelp() {
 		System.out.println("\nOptions:");
-		System.out.println("undo|u                           Undo remove command.");
-		System.out.println("display|d                        Display the graph.");
+		System.out.println("undo                             Undo remove command.");
 		System.out.println("solve|s                          Solve the graph and display the solution.");
 		System.out.println("add|a <vertex 1> <vertex 2>      Add an edge between vertex 1 and vertex 2 to the graph. Adds vertices if necessary.");
 		System.out.println("remove|r <vertex 1> <vertex 2>   Remove the edge between the specified vertices.");
@@ -158,7 +164,7 @@ public class UserInterface {
 	}
 
 	public enum UserOption {
-		ADD_EDGE, REMOVE_EDGE, UNDO_EDGE_REMOVAL, DISPLAY_GRAPH, WRITE_GRAPH_TO_FILE,
+		ADD_EDGE, REMOVE_EDGE, UNDO_EDGE_REMOVAL, WRITE_GRAPH_TO_FILE,
 		LOAD_GRAPH_FROM_FILE,
 		
 		DISPLAY_MIN_COLORS,
