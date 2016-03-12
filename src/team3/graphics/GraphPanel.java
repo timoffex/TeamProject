@@ -102,7 +102,7 @@ public class GraphPanel extends JPanel {
 		
 		Map<String, Vec2> forces = new HashMap<>();
 		for (String data : allData) forces.put(data, new Vec2(0,0));
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 100; i++) {
 			
 			// Compute forces
 			for (int j = 0; j < allData.size(); j++) {
@@ -120,6 +120,9 @@ public class GraphPanel extends JPanel {
 					toOther.multiply(0.001/distance);
 					
 					if (graph.areNodesConnected(data, other)) {
+						if (distance < 100)
+							toOther.multiply(-100/distance);
+						
 						force.add(toOther);
 						forces.get(other).subtract(toOther);
 					} else {
