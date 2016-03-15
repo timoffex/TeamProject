@@ -76,7 +76,7 @@ public class GraphPanel extends JPanel {
 	}
 	
 	private void drawCenteredString(Graphics g, String text, Rectangle rect) {
-		Font font = Font.decode("georgia");
+		Font font = Font.decode("Georgia-18");
 		
 	    FontMetrics metrics = g.getFontMetrics(font); // Get the FontMetrics
 	   

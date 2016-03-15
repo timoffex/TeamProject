@@ -54,7 +54,7 @@ public class ConsoleWindow extends JFrame {
 		consoleOutput.setLineWrap(true);
 		consoleOutput.setWrapStyleWord(true);
 		consoleOutput.setEditable(false);
-		consoleOutput.setFont(Font.decode("Courier"));
+		consoleOutput.setFont(Font.decode("Courier-15"));
 		
 		((DefaultCaret) consoleOutput.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		

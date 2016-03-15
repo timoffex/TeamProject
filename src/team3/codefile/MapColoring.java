@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.function.Consumer;
 
 
+
 public class MapColoring<E> extends Graph<E> {
 	private Map<Vertex<E>, Integer> vertexColors = new HashMap<>();
 	
