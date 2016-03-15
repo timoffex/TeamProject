@@ -2,6 +2,7 @@ package team3.graphics;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -53,6 +54,7 @@ public class ConsoleWindow extends JFrame {
 		consoleOutput.setLineWrap(true);
 		consoleOutput.setWrapStyleWord(true);
 		consoleOutput.setEditable(false);
+		consoleOutput.setFont(Font.decode("Courier"));
 		
 		((DefaultCaret) consoleOutput.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		
@@ -137,6 +139,8 @@ public class ConsoleWindow extends JFrame {
 		if (currentInputInList)
 			previousInputs.remove(previousInputs.size()-1);
 		
+		
+		currentEntry = 0;
 		
 		String input = consoleInput.getText();
 		previousInputs.add(input);

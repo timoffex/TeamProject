@@ -80,12 +80,14 @@ public class UserInterface {
 			return new Pair<>(UserOption.LOAD_GRAPH_FROM_FILE, options);
 		case "save":
 			return new Pair<>(UserOption.WRITE_GRAPH_TO_FILE, options);
+		case "clear":
+			return new Pair<>(UserOption.CLEAR_GRAPH, options);
 		}
 
 		// add <city name 1>, <city name 2>
 		// -> Pair(ADD_EDGE, "city name 1, city name 2")
 
-		return new Pair<>(UserOption.NOOP, null);
+		return new Pair<>(UserOption.BAD_INPUT, null);
 	}
 
 	/**
@@ -106,10 +108,12 @@ public class UserInterface {
 	
 	public void displayHelp() {
 		System.out.println("\nOptions:");
-		System.out.println("undo                             Undo remove command.");
-		System.out.println("solve|s                          Solve the graph and display the solution.");
-		System.out.println("add|a <vertex 1> <vertex 2>      Add an edge between vertex 1 and vertex 2 to the graph. Adds vertices if necessary.");
-		System.out.println("remove|r <vertex 1> <vertex 2>   Remove the edge between the specified vertices.");
+		System.out.println("add <vertex 1> <vertex 2>        Add an edge between vertex 1 and vertex 2 to the graph. Adds vertices if necessary.");
+		System.out.println("remove <vertex 1> <vertex 2>     Remove the edge between the specified vertices.");
+		System.out.println("remove <vertex>                  Removes a vertex. This operation cannot be undone.");
+		System.out.println("undo                             Undo remove or add command (does not undo clear command).");
+		System.out.println("clear                            Remove all vertices from the graph.");
+		System.out.println("solve|s                          Display the minimum number of colors required for the graph.");
 		System.out.println("save <path to file>              Save the graph to a file.");
 		System.out.println("load <path to file>              Load the graph from a file.");
 		System.out.println("help                             Display this menu.");
@@ -164,7 +168,10 @@ public class UserInterface {
 	}
 
 	public enum UserOption {
-		ADD_EDGE, REMOVE_EDGE, UNDO_EDGE_REMOVAL, WRITE_GRAPH_TO_FILE,
+		ADD_EDGE, REMOVE_EDGE, UNDO_EDGE_REMOVAL, 
+		CLEAR_GRAPH,
+		
+		WRITE_GRAPH_TO_FILE,
 		LOAD_GRAPH_FROM_FILE,
 		
 		DISPLAY_MIN_COLORS,
@@ -172,6 +179,6 @@ public class UserInterface {
 		DISPLAY_SOLUTION,
 		
 		QUIT,
-		NOOP
+		BAD_INPUT
 	}
 }

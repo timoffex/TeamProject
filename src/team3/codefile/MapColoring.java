@@ -162,6 +162,51 @@ public class MapColoring<E> extends Graph<E> {
 		
 	}
 	
+	/**
+	 * Removes the vertex that contains this data
+	 * and removes all edges that connect to this vertex.
+	 * @param data
+	 */
+	public boolean removeVertex(E data) {
+		boolean found = false;
+		
+		Iterator<Vertex<E>> itr = vertexSet.values().iterator();
+		
+		while (itr.hasNext()) {
+			Vertex<E> v = itr.next();
+			v.adjList.remove(data);
+			
+			// If the vertex IS the one we're looking for, get rid of it.
+			if (v.getData().equals(data)) {
+				itr.remove();
+				found = true;
+			}
+		}
+		
+		return found;
+	}
+	
+	/**
+	 * A helper method used to neatly save a graph to a file.
+	 * @param data
+	 * @return
+	 */
+	public List<E> getUnvisitedNeighborsOfData(E data) {
+		Vertex<E> vertex = vertexSet.get(data);
+		if (vertex == null) return null;
+		
+		List<Vertex<E>> neighbors = getNeighbors(vertex);
+		
+		List<E> dataNeighbors = new ArrayList<>();
+		
+		for (Vertex<E> v : neighbors)
+			if (!v.isVisited())
+				dataNeighbors.add(v.data);
+		
+		return dataNeighbors;
+		
+	}
+	
 	public boolean areNodesConnected(E d1, E d2) {
 		return vertexSet.get(d1).adjList.containsKey(d2);
 	}

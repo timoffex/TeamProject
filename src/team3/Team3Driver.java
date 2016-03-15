@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
@@ -15,6 +17,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import team3.UserInterface.UserOption;
+import team3.codefile.LinkedStack;
 import team3.codefile.MapColoring;
 import team3.codefile.Pair;
 import team3.codefile.Visitor;
@@ -27,6 +30,8 @@ public class Team3Driver {
 	
 	private static ConsoleWindow console;
 	private static GraphWindow display;
+	
+	private static LinkedStack<Pair<UserOption, String>> edgeCommandHistory;
 	
 	public static void main(String[] args) {
 		
@@ -44,11 +49,22 @@ public class Team3Driver {
 		ui.displayHello();
 		ui.displayHelp();
 		
-		Pair<UserOption, String> option = ui.getUserOption();
+		
+		edgeCommandHistory = new LinkedStack<>();
+		
+		
+		Pair<UserOption, String> option;
+		while ((option = ui.getUserOption()).first == UserOption.BAD_INPUT)
+			System.out.println("Unknown command. Type help for a list of commands.");
+		
+		
 		while (option.first != UserOption.QUIT) {
+			
+			
 			performAction(option);
 			
-			option = ui.getUserOption();
+			while ((option = ui.getUserOption()).first == UserOption.BAD_INPUT)
+				System.out.println("Unknown command. Type help for a list of commands.");
 		}
 		
 		// Close everything!
@@ -60,8 +76,13 @@ public class Team3Driver {
 		switch (action.first) {
 		case ADD_EDGE: addEdge(action.second); break;
 		case REMOVE_EDGE: removeEdge(action.second); break;
-		case LOAD_GRAPH_FROM_FILE: loadGraph(action.second); break;
+		case UNDO_EDGE_REMOVAL: undoEdgeCommand(action.second); break;
+		case CLEAR_GRAPH: graph.clear(); display.recomputeNodePlacements(); break;
+		
 		case DISPLAY_SOLUTION: displaySolution(action.second); break;
+		
+		case LOAD_GRAPH_FROM_FILE: loadGraph(action.second); break;
+		case WRITE_GRAPH_TO_FILE: saveGraph(action.second); break;
 		
 		// Removing this for now because of visual display.
 //		case DISPLAY_GRAPH: displayGraph(action.second); break;
@@ -77,7 +98,7 @@ public class Team3Driver {
 	
 	private static void addEdge(String args) {
 		if (args == null) {
-			System.out.println("Usage: add <v1> <v2>  OR  a <v1> <v2>");
+			System.out.println("Usage: add <v1> <v2>");
 			return;
 		}
 		
@@ -89,23 +110,38 @@ public class Team3Driver {
 			graph.addEdge(vertices[0], vertices[1], 1);
 			graph.addEdge(vertices[1], vertices[0], 1);
 			display.recomputeNodePlacements();
+			
+			System.out.println("Added an edge between " + vertices[0] + " and " + vertices[1]);
+			edgeCommandHistory.push(new Pair<UserOption, String>(UserOption.ADD_EDGE, args));
 		}
 	}
 	
 	private static void removeEdge(String args) {
 		if (args == null) {
-			System.out.println("Usage: remove <v1> <v2>  OR  r <v1> <v2>");
+			System.out.println("Usage: remove <v1> <v2>");
 			return;
 		}
 		
 		String[] vertices = args.split(" ");
 		
-		if (vertices.length != 2)
-			System.out.println("Wrong arguments.");
-		else {
+		if (vertices.length == 1) {		// We can't undo this operation. Remove a single vertex.
+			
+			if (graph.removeVertex(vertices[0])) {
+				System.out.println("Removed the vertex: " + vertices[0]);
+				display.recomputeNodePlacements();
+			} else
+				System.out.println("Could not find that vertex.");
+			
+		} else if (vertices.length == 2){	// Remove an edge.
 			graph.remove(vertices[0], vertices[1]);
 			graph.remove(vertices[1], vertices[0]);
+			
 			display.recomputeNodePlacements();
+
+			System.out.println("Removed an edge between " + vertices[0] + " and " + vertices[1]);
+			edgeCommandHistory.push(new Pair<UserOption, String>(UserOption.REMOVE_EDGE, args));
+		} else  {
+			System.out.println("Wrong arguments.");
 		}
 	}
 	
@@ -130,6 +166,7 @@ public class Team3Driver {
 				
 				if (vertices.length != 2) {
 					System.out.println("Syntax error on line: " + line);
+					break;
 				}
 				
 				graph.addEdge(vertices[0], vertices[1], 1);
@@ -141,6 +178,35 @@ public class Team3Driver {
 			in.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("Could not find file!");
+		}
+	}
+	
+	private static void saveGraph(String options) {
+		if (options == null) {
+			System.out.println("No file name given. Usage: save <file name>");
+			return;
+		}
+		
+		
+		try {
+			File file = new File(options);
+			final PrintWriter out = new PrintWriter(file);
+			
+			graph.breadthFirstTraversal(graph.getAnyData(), new Visitor<String>() {
+				@Override
+				public void visit(String obj) {
+					List<String> neighbors = graph.getUnvisitedNeighborsOfData(obj);
+					
+					for (String neighbor : neighbors)
+						out.println(obj + " " + neighbor);
+				}
+			});
+			
+
+			System.out.println("Saved the graph to " + file.getAbsolutePath());			
+			out.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("Could not create file!");
 		}
 	}
 	
@@ -199,6 +265,17 @@ public class Team3Driver {
 		while (itr.hasNext()) {
 			Entry<String, Integer> entry = itr.next();
 			System.out.println(entry.getKey() + ": " + (entry.getValue()+1));
+		}
+	}
+	
+	private static void undoEdgeCommand(String options) {
+		Pair<UserOption, String> commandPair = edgeCommandHistory.pop();
+		
+		switch (commandPair.first) {
+		case ADD_EDGE: removeEdge(commandPair.second); break;
+		case REMOVE_EDGE: addEdge(commandPair.second); break;
+		default:
+			System.out.println("Something went wrong in the code. Check Team3Driver.undoEdgeRemoval()");
 		}
 	}
 }
