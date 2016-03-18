@@ -11,6 +11,9 @@ import java.util.function.Consumer;
 
 
 public class MapColoring<E> extends Graph<E> {
+	/**
+	 * Maps each vertex to an integer starting at 0 and ending at minColors-1.
+	 */
 	private Map<Vertex<E>, Integer> vertexColors = new HashMap<>();
 	
 	/**

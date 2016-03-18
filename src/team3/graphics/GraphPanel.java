@@ -10,9 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.swing.JPanel;
 
@@ -20,10 +18,11 @@ import team3.codefile.MapColoring;
 
 public class GraphPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
-	
-	private static final Color[] COLORS = new Color[] {Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.CYAN, Color.MAGENTA};
-	
+
+	/** The graph this panel should render. */
 	private MapColoring<String> graph;
+	
+	/** A map from data in the graph to positions on the screen. */
 	private Map<String, Vec2> placements;
 	
 	public GraphPanel(MapColoring<String> graph) {
@@ -67,13 +66,30 @@ public class GraphPanel extends JPanel {
 
 			int x = (int)entry.getValue().x;
 			int y = (int)entry.getValue().y;
-			g.setColor(COLORS[nodeColors.get(entry.getKey())]);
+			g.setColor(getColor(nodeColors.get(entry.getKey())));
 			g.fillOval(x-r2, y-r2, 2*r2, 2*r2);
 			
 			g.setColor(Color.BLACK);
 			drawCenteredString(g, entry.getKey(), new Rectangle(x-r2, y, 2*r2, 2*r2));
 		}
 	}
+	
+	/**
+	 * Maps color indices (in range [0,minColors-1]) to distinct colors.
+	 * @param index - Index of the color (values of the entries in graph.getColors())
+	 * @return A color that should look visually distinct from the other colors. If
+	 * minColors is too high, the method will still work, but the user should use
+	 * the "solve" command to receive solutions.
+	 */
+	private Color getColor(int index) {
+		int minColors = graph.getMinimumNumberOfColors();
+		
+		float hue = (float)index/minColors;  // range: [0,1)
+		
+		return Color.getHSBColor(hue, 0.6f, 0.6f);
+	}
+	
+	
 	
 	private void drawCenteredString(Graphics g, String text, Rectangle rect) {
 		Font font = Font.decode("Georgia-18");
@@ -88,6 +104,11 @@ public class GraphPanel extends JPanel {
 	    g.drawString(text, x, y);
 	}
 	
+	
+	/**
+	 * Computes a position for each node in the graph such that nodes
+	 * are fairly well spaced-out. Then, calls repaint().
+	 */
 	public void recomputeNodePlacements() {
 		placements = new HashMap<>();
 		
@@ -167,6 +188,11 @@ public class GraphPanel extends JPanel {
 	}
 }
 
+/**
+ * Helper class used only in GraphPanel.java
+ * @author timoffex
+ *
+ */
 class Vec2 {
 	double x, y;
 	

@@ -130,7 +130,7 @@ public class ConsoleWindow extends JFrame {
 		// wait for enter key to be pressed
 		try {
 			synchronized (consoleInput) {
-				consoleInput.wait();
+				consoleInput.wait();		// thread voodoo
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -150,6 +150,9 @@ public class ConsoleWindow extends JFrame {
 		return input + "\n";
 	}
 	
+	/**
+	 * Used to detect when the user presses the Enter key in the console input.
+	 */
 	private class InputActionListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {

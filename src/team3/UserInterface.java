@@ -28,13 +28,7 @@ public class UserInterface {
 
 	/**
 	 * Gets user command and returns the command with its options as a pair P
-	 * such that P.first is the command and P.second is the extra options. <br/>
-	 * <br/>
-	 * If the command is ADD_EDGE, options will be the edge name.<br/>
-	 * If the command is REMOVE_EDGE, options will be the edge name.<br/>
-	 * If the command is WRITE_GRAPH_TO_FILE, options will be the file name.
-	 * <br/>
-	 * Otherwise, options is null.
+	 * such that P.first is the command and P.second is the extra options.
 	 */
 	public Pair<UserOption, String> getUserOption() {
 		String command, options;
@@ -122,61 +116,14 @@ public class UserInterface {
 		System.out.println();
 	}
 
-	// Returns a PrintWriter which lets you write to a file
-	public PrintWriter getOutputFile() {
-		// TODO ask user for output file
-		String filename;
-		PrintWriter writer = null;
-		Scanner userScanner = new Scanner(System.in);
-
-		System.out.print("Enter output filename: ");
-		filename = userScanner.nextLine();
-		File file = new File(filename + ".txt");
-		try {
-			writer = new PrintWriter(file);
-		} catch (FileNotFoundException e) {
-			System.out.println("Can't open output file\n");
-		}
-
-		userScanner.close();
-		
-		return writer;
-	}
-
-	// used to read data from input file
-	public static Scanner openInputFile() {
-		String filename;
-		Scanner userScanner = new Scanner(System.in);
-		Scanner scanner = null;
-
-		System.out.print("Enter the input filename: ");
-		filename = userScanner.nextLine();
-		File file = new File(filename);
-
-		try {
-			scanner = new Scanner(file);
-		} // end try
-		catch (FileNotFoundException fe) {
-			System.out.println("Can't open input file\n");
-			userScanner.close();
-			return null; // array of 0 elements
-		} // end catch
-		
-		userScanner.close();
-		
-		return scanner;
-	}
-
 	public enum UserOption {
 		ADD_EDGE, REMOVE_EDGE, UNDO_EDGE_REMOVAL, 
 		CLEAR_GRAPH,
 		
+		DISPLAY_SOLUTION,
+
 		WRITE_GRAPH_TO_FILE,
 		LOAD_GRAPH_FROM_FILE,
-		
-		DISPLAY_MIN_COLORS,
-		DISPLAY_COLORS,
-		DISPLAY_SOLUTION,
 		
 		QUIT,
 		BAD_INPUT

@@ -13,9 +13,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
 
-import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
-
 import team3.UserInterface.UserOption;
 import team3.codefile.LinkedStack;
 import team3.codefile.MapColoring;
@@ -24,6 +21,29 @@ import team3.codefile.Visitor;
 import team3.graphics.ConsoleWindow;
 import team3.graphics.GraphWindow;
 
+
+/*
+ To make this easier to grade, here are the important classes and their
+ important methods:
+ 	
+ 	class Team3Driver
+ 		main()
+ 		performAction()
+ 		undoEdgeCommand() (undo function)
+ 	
+ 	class UserInterface
+ 		enum UserOption
+ 		getUserOption()
+ 	
+ 	class MapColoring
+ 		solveProblem()
+ 		
+ 	
+ Honorable mentions:
+ 	class ConsoleWindow		-- features multi-threading trickery
+ 	GraphPanel.getColor()   -- generates colors for the graph; there is no longer
+ 	 							a fixed-length color array
+ */
 public class Team3Driver {
 	private static MapColoring<String> graph;
 	private static UserInterface ui;
@@ -31,16 +51,18 @@ public class Team3Driver {
 	private static ConsoleWindow console;
 	private static GraphWindow display;
 	
+	/** A stack of REMOVE and ADD commands. Used for the UNDO command. */
 	private static LinkedStack<Pair<UserOption, String>> edgeCommandHistory;
 	
 	public static void main(String[] args) {
 		
-		// This should be done first.
+		// This should be done first. Sets up the console window.
 		console = new ConsoleWindow();
 		System.setOut(new PrintStream(new ConsoleOutputStream(console)));
 		System.setIn(new ConsoleInputStream(console));
 		
 		
+		// Assign all other variables.
 		ui = new UserInterface();
 		graph = new MapColoring<>();
 		display = new GraphWindow(graph);
@@ -58,9 +80,8 @@ public class Team3Driver {
 			System.out.println("Unknown command. Type help for a list of commands.");
 		
 		
+		// Command loop.
 		while (option.first != UserOption.QUIT) {
-			
-			
 			performAction(option);
 			
 			while ((option = ui.getUserOption()).first == UserOption.BAD_INPUT)
@@ -71,7 +92,10 @@ public class Team3Driver {
 		System.exit(0);
 	}
 	
-	
+	/**
+	 * Calls the corresponding method for the given command.
+	 * @param action
+	 */
 	private static void performAction(Pair<UserOption, String> action) {
 		switch (action.first) {
 		case ADD_EDGE: addEdge(action.second); break;
@@ -84,11 +108,8 @@ public class Team3Driver {
 		case LOAD_GRAPH_FROM_FILE: loadGraph(action.second); break;
 		case WRITE_GRAPH_TO_FILE: saveGraph(action.second); break;
 		
-		// Removing this for now because of visual display.
-//		case DISPLAY_GRAPH: displayGraph(action.second); break;
 		
-		
-		// If we're here, there is a command that wasn't implemented yet.
+		// If we're here, there is a command that wasn't implemented yet. This shouldn't happen.
 		default:
 			System.out.println("UNIMPLEMENTED COMMAND");
 			break;
@@ -286,7 +307,7 @@ public class Team3Driver {
 class ConsoleOutputStream extends OutputStream {
 	private final ConsoleWindow console;
 	
-	ConsoleOutputStream(ConsoleWindow cons) {
+	public ConsoleOutputStream(ConsoleWindow cons) {
 		console = cons;
 	}
 	
@@ -303,7 +324,7 @@ class ConsoleOutputStream extends OutputStream {
 }
 
 /**
- * Used to redirect System.out to custom console window.
+ * Used to redirect System.in to custom console window.
  */
 class ConsoleInputStream extends InputStream {
 	private final ConsoleWindow console;
