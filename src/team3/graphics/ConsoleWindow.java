@@ -43,7 +43,7 @@ public class ConsoleWindow extends JFrame {
 	public ConsoleWindow() {
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		
-		int width = 500;
+		int width = 800;
 		int height = 300;
 		int x = screenSize.width/2 - 3*width/2;
 		int y = screenSize.height/2 - 3*height/2;

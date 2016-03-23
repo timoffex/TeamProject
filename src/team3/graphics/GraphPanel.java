@@ -25,10 +25,26 @@ public class GraphPanel extends JPanel {
 	/** A map from data in the graph to positions on the screen. */
 	private Map<String, Vec2> placements;
 	
+	
+	/** A mapping from data to whether the data should be highlighted. */
+	private Map<String, Color> highlights;
+	private static final Color HIGHLIGHT_OLD = Color.GRAY;
+	private static final Color HIGHLIGHT_NEW = Color.BLACK;
+	private String lastHighlighted;
+	
+	
+	/** A thread used to animate in recomputeNodePlacements() */
+	private Thread recomputeThread;
+	
+	/** Used in recomputeNodePlacements(). */
+	private Map<String, Vec2> velocities = new HashMap<>();
+	
 	public GraphPanel(MapColoring<String> graph) {
 		this.graph = graph;
 		
 		placements = new HashMap<>();
+		highlights = new HashMap<>();
+		lastHighlighted = null;
 	}
 
 	@Override
@@ -37,6 +53,9 @@ public class GraphPanel extends JPanel {
 		
 		// Half of radius
 		int r2 = 25;
+		
+		// Half of highlight radius
+		int r2h = 28;
 		
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 0, getWidth(), getHeight());
@@ -50,23 +69,37 @@ public class GraphPanel extends JPanel {
 			int y1 = (int)entry.getValue().y;
 			
 			List<String> neighbors = graph.getNeighborsOfData(entry.getKey());
-			for (String neighbor : neighbors) {
-				int x2 = (int)placements.get(neighbor).x;
-				int y2 = (int)placements.get(neighbor).y;
-				g.setColor(Color.BLACK);
-				g.drawLine(x1, y1, x2, y2);
-			}
+			
+			if (neighbors != null)
+				for (String neighbor : neighbors) {
+					int x2 = (int)placements.get(neighbor).x;
+					int y2 = (int)placements.get(neighbor).y;
+					g.setColor(Color.BLACK);
+					g.drawLine(x1, y1, x2, y2);
+				}
 		}
 		
 		Map<String, Integer> nodeColors = graph.getColors();
-		
+	
 		itr = placements.entrySet().iterator();
-		while (itr.hasNext()) {			// Pass 2 - draw circles
+		while (itr.hasNext()) {			// Pass 2 - draw circles and highlights
 			Entry<String, Vec2> entry = itr.next();
 
 			int x = (int)entry.getValue().x;
 			int y = (int)entry.getValue().y;
-			g.setColor(getColor(nodeColors.get(entry.getKey())));
+			
+			Color highlight = highlights.get(entry.getKey());
+			
+			Color color = highlight==null ? getColor(nodeColors.get(entry.getKey())) : Color.WHITE;
+				
+			// Node highlight
+			if (highlight != null) {
+				g.setColor(highlight);
+				g.fillOval(x-r2h, y-r2h, 2*r2h, 2*r2h);
+			}
+			
+			// Node circle
+			g.setColor(color);
 			g.fillOval(x-r2, y-r2, 2*r2, 2*r2);
 			
 			g.setColor(Color.BLACK);
@@ -81,7 +114,10 @@ public class GraphPanel extends JPanel {
 	 * minColors is too high, the method will still work, but the user should use
 	 * the "solve" command to receive solutions.
 	 */
-	private Color getColor(int index) {
+	private Color getColor(Integer index) {
+		if (index == null)
+			return Color.WHITE;
+		
 		int minColors = graph.getMinimumNumberOfColors();
 		
 		float hue = (float)index/minColors;  // range: [0,1)
@@ -110,79 +146,146 @@ public class GraphPanel extends JPanel {
 	 * are fairly well spaced-out. Then, calls repaint().
 	 */
 	public void recomputeNodePlacements() {
-		placements = new HashMap<>();
 		
-		// Assign random positions between (0,0) and (w,h)
+		if (recomputeThread != null && recomputeThread.isAlive())
+			recomputeThread.interrupt();
+		
+
+		// This section needs to be outside of the recompute thread because we need
+		// placements to be guaranteed to contain a key for every node in the graph
+		// by the time this method exits.
+		Map<String, Vec2> newPlacements = new HashMap<>();
+		
+		// Assign random positions between (0,0) and (w,h) to new nodes
 		Iterator<String> itr = graph.dataIterator();
-		while (itr.hasNext())
-			placements.put(itr.next(), new Vec2(Math.random()*getWidth(), Math.random()*getHeight()));
+		while (itr.hasNext()) {
+			String key = itr.next();
+			if (!placements.containsKey(key))
+				newPlacements.put(key, new Vec2(Math.random()*getWidth(), Math.random()*getHeight()));
+			else
+				newPlacements.put(key, placements.get(key));
+		}
 		
-		// Use a rough, force-based algorithm to space out the graph
-		List<String> allData = new ArrayList<>();
-		allData.addAll(placements.keySet());
-		
-		Map<String, Vec2> forces = new HashMap<>();
-		for (String data : allData) forces.put(data, new Vec2(0,0));
-		for (int i = 0; i < 100; i++) {
-			
-			// Compute forces
-			for (int j = 0; j < allData.size(); j++) {
-				String data = allData.get(j);
-				Vec2 posData = placements.get(data);
-				Vec2 force = forces.get(data);
+		placements = newPlacements;
+
+		recomputeThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				// Use a force-based algorithm to space out the graph
 				
-				for (int k = j+1; k < allData.size(); k++) {
-					String other = allData.get(k);
-					Vec2 posOther = placements.get(other);
+				List<String> allData = new ArrayList<>();
+				allData.addAll(placements.keySet());
+
+				Map<String, Vec2> forces = new HashMap<>();
+				for (int i = 0; i < 10000; i++) {
+					for (String data : allData) forces.put(data, new Vec2(0,0));
 					
-					Vec2 toOther = Vec2.between(posData, posOther);
+					Vec2 screenCenter = new Vec2(getWidth()/2, getHeight()/2);
 					
-					double distance = toOther.length();
-					toOther.multiply(0.001/distance);
-					
-					if (graph.areNodesConnected(data, other)) {
-						if (distance < 100)
-							toOther.multiply(-100/distance);
+					// Compute forces
+					for (int j = 0; j < allData.size(); j++) {
+						String data = allData.get(j);
+						Vec2 posData = placements.get(data);
+						Vec2 force = forces.get(data);
+
+						for (int k = j+1; k < allData.size(); k++) {
+							String other = allData.get(k);
+							Vec2 posOther = placements.get(other);
+							
+							Vec2 toOther = Vec2.between(posData, posOther);
+							
+							double distance = toOther.length();
+							toOther.multiply(1./distance);
+							
+							double targetDistance;
+							
+							if (graph.areNodesConnected(data, other))
+								targetDistance = 100;
+							else
+								targetDistance = 300;
+							
+							toOther.multiply(Math.log(distance/targetDistance));
+							
+							force.add(toOther);
+							forces.get(other).subtract(toOther);
+						}
 						
-						force.add(toOther);
-						forces.get(other).subtract(toOther);
-					} else {
-						force.subtract(toOther);
-						forces.get(other).add(toOther);
+						Vec2 toCenter = Vec2.between(posData, screenCenter);
+						toCenter.multiply(0.005);
+						force.add(toCenter);
+						
+						forces.put(data, force);
+						
+						Vec2 vel = velocities.get(data);
+						if (vel == null)
+							vel = new Vec2(0, 0);
+						
+						vel.multiply(0.99);
+						vel.add(new Vec2(force.x*0.02, force.y*0.02));
+						velocities.put(data, vel);
+					}
+					
+					// Move nodes
+					for (String data : allData)
+						placements.get(data).add(velocities.get(data));
+					
+					repaint();
+					
+					try {
+						Thread.sleep(20);
+					} catch (InterruptedException e) {
+						// we got interrupted-just stop the method!
+						return;
 					}
 				}
-				
-				forces.put(data, force);
 			}
-			
-			// Move nodes
-			for (String data : allData)
-				placements.get(data).add(forces.get(data));
-		}
+		});
 		
-		// Renormalize positions
-		Vec2 max = new Vec2(-Double.MAX_VALUE,-Double.MAX_VALUE);
-		Vec2 min = new Vec2(Double.MAX_VALUE,Double.MAX_VALUE);
-		
-		for (String data : allData) {
-			Vec2 pos = placements.get(data);
-			if (pos.x > max.x) max.x = pos.x;
-			if (pos.y > max.y) max.y = pos.y;
-			if (pos.x < min.x) min.x = pos.x;
-			if (pos.y < min.y) min.y = pos.y;
-		}
+		recomputeThread.start();
 		
 		
-		Vec2 dif = new Vec2(max.x,max.y);
-		dif.subtract(min);
 		
-		for (String data : allData) {
-			Vec2 pos = placements.get(data);
-			pos.x = (pos.x-min.x)*(getWidth()-100)/dif.x + 50;
-			pos.y = (pos.y-min.y)*(getHeight()-100)/dif.y + 50;
-		}
+//		// Renormalize positions
+//		Vec2 max = new Vec2(-Double.MAX_VALUE,-Double.MAX_VALUE);
+//		Vec2 min = new Vec2(Double.MAX_VALUE,Double.MAX_VALUE);
+//		
+//		for (String data : allData) {
+//			Vec2 pos = placements.get(data);
+//			if (pos.x > max.x) max.x = pos.x;
+//			if (pos.y > max.y) max.y = pos.y;
+//			if (pos.x < min.x) min.x = pos.x;
+//			if (pos.y < min.y) min.y = pos.y;
+//		}
+//		
+//		
+//		Vec2 dif = new Vec2(max.x,max.y);
+//		dif.subtract(min);
+//		
+//		for (String data : allData) {
+//			Vec2 pos = placements.get(data);
+//			pos.x = (pos.x-min.x)*(getWidth()-100)/dif.x + 50;
+//			pos.y = (pos.y-min.y)*(getHeight()-100)/dif.y + 50;
+//		}
+//		
 		
 		
+		repaint();
+	}
+	
+	
+	public void clearHighlights() {
+		lastHighlighted = null;
+		
+		Iterator<String> itr = highlights.keySet().iterator();
+		while (itr.hasNext()) highlights.put(itr.next(), null);
+		
+		repaint();
+	}
+	
+	public void highlight(String data) {
+		highlights.put(lastHighlighted, HIGHLIGHT_OLD);
+		highlights.put(data, HIGHLIGHT_NEW);
+		lastHighlighted = data;
 		
 		repaint();
 	}

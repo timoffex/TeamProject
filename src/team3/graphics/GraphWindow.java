@@ -35,4 +35,13 @@ public class GraphWindow extends JFrame {
 	public void recomputeNodePlacements() {
 		panel.recomputeNodePlacements();
 	}
+	
+	
+	public void clearHighlights() {
+		panel.clearHighlights();
+	}
+	
+	public void highlight(String data) {
+		panel.highlight(data);
+	}
 }

@@ -238,6 +238,7 @@ public class Graph<E>
 		   {
 			   Entry<E, Pair<Vertex<E>, Double>> nextEntry = iter.next();
 			   Vertex<E> neighborVertex = nextEntry.getValue().first;
+			   
 			   if( !neighborVertex.isVisited() )
 			   {
 				   vertexQueue.enqueue(neighborVertex);
@@ -274,12 +275,4 @@ public class Graph<E>
 		   }
 	   }
    }
-
-
-// WRITE THE INSTANCE METHOD HERE TO
-   //         WRITE THE GRAPH's vertices and its
-   //         adjacency list TO A TEXT FILE (SUGGEST TO PASS AN
-   //        ALREADY OPEN PrintWriter TO THIS) !
-
-
 }

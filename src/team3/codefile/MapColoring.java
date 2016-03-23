@@ -17,6 +17,26 @@ public class MapColoring<E> extends Graph<E> {
 	private Map<Vertex<E>, Integer> vertexColors = new HashMap<>();
 	
 	/**
+	 * Associates a "visited" boolean with each vertex. We cannot use
+	 * the existing visited attribute of Vertex because that can clash
+	 * with traversal (which is done in a separate thread). 
+	 */
+	private Map<Vertex<E>, Boolean> isVisited = new HashMap<>();
+	
+	/** Helper method to access isVisited map. */
+	private boolean isVisited(Vertex<E> v) {
+		Boolean b = isVisited.get(v);
+		
+		if (b == null || !b)
+			return false;
+		else
+			return true;
+	}
+	
+	private void visit(Vertex<E> v) { isVisited.put(v, true); }
+	private void unvisit(Vertex<E> v) { isVisited.put(v, false); }
+	
+	/**
 	 * The amount of "colors" used so far. The "colors" are
 	 * numbered 0 - (minColors-1). A "color" is any property
 	 * that must be different for any two adjacent vertices. 
@@ -31,7 +51,7 @@ public class MapColoring<E> extends Graph<E> {
 	private void solveProblem() {
 		minColors = 1;
 		vertexColors.clear();
-		unvisitVertices();
+		isVisited.clear();
 		
 		// Perform a breadth-first traversal of the graph,
 		// assigning a color to each vertex.
@@ -49,17 +69,17 @@ public class MapColoring<E> extends Graph<E> {
 			while (!toVisit.isEmpty()) {
 				Vertex<E> next = toVisit.dequeue();
 				
-				if (next.isVisited())
+				if (isVisited(next))
 					continue;
 				
-				next.visit();
+				visit(next);
 				assignColor(next);
 				
 				
 				// Enqueue all unvisited neighbors.
 				List<Vertex<E>> neighbors = getNeighbors(next);
 				for (Vertex<E> neighbor : neighbors)
-					if (!neighbor.isVisited())
+					if (!isVisited(neighbor))
 						toVisit.enqueue(neighbor);
 			}
 		}
@@ -139,7 +159,7 @@ public class MapColoring<E> extends Graph<E> {
 		while (itr.hasNext()) {
 			Vertex<E> v = itr.next();
 			
-			if (!v.isVisited())
+			if (!isVisited(v))
 				return v;
 		}
 		
@@ -149,6 +169,20 @@ public class MapColoring<E> extends Graph<E> {
 	
 	
 	
+	/**
+	 * Returns true if the graph contains a vertex with the given data.
+	 * @param data
+	 * @return
+	 */
+	public boolean contains(E data) {
+		Iterator<E> itr = dataIterator();
+		
+		while (itr.hasNext())
+			if (itr.next().equals(data))
+				return true;
+		
+		return false;
+	}
 	
 	
 	public List<E> getNeighborsOfData(E data) {
@@ -204,7 +238,7 @@ public class MapColoring<E> extends Graph<E> {
 		List<E> dataNeighbors = new ArrayList<>();
 		
 		for (Vertex<E> v : neighbors)
-			if (!v.isVisited())
+			if (!isVisited(v))
 				dataNeighbors.add(v.data);
 		
 		return dataNeighbors;
@@ -212,7 +246,11 @@ public class MapColoring<E> extends Graph<E> {
 	}
 	
 	public boolean areNodesConnected(E d1, E d2) {
-		return vertexSet.get(d1).adjList.containsKey(d2);
+		Vertex<E> v = vertexSet.get(d1);
+		if (v == null)
+			return false;
+		
+		return v.adjList.containsKey(d2);
 	}
 	
 	public Vertex<E> getAnyVertex() {

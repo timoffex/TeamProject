@@ -76,6 +76,8 @@ public class UserInterface {
 			return new Pair<>(UserOption.WRITE_GRAPH_TO_FILE, options);
 		case "clear":
 			return new Pair<>(UserOption.CLEAR_GRAPH, options);
+		case "traverse":
+			return new Pair<>(UserOption.TRAVERSE, options);
 		}
 
 		// add <city name 1>, <city name 2>
@@ -108,6 +110,7 @@ public class UserInterface {
 		System.out.println("undo                             Undo remove or add command (does not undo clear command).");
 		System.out.println("clear                            Remove all vertices from the graph.");
 		System.out.println("solve|s                          Display the minimum number of colors required for the graph.");
+		System.out.println("traverse						 Traverse the graph.");
 		System.out.println("save <path to file>              Save the graph to a file.");
 		System.out.println("load <path to file>              Load the graph from a file.");
 		System.out.println("help                             Display this menu.");
@@ -119,6 +122,8 @@ public class UserInterface {
 	public enum UserOption {
 		ADD_EDGE, REMOVE_EDGE, UNDO_EDGE_REMOVAL, 
 		CLEAR_GRAPH,
+		
+		TRAVERSE,
 		
 		DISPLAY_SOLUTION,
 

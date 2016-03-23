@@ -51,6 +51,9 @@ public class Team3Driver {
 	private static ConsoleWindow console;
 	private static GraphWindow display;
 	
+	/** Used for traversal animation. */
+	private static boolean performingAnimation;
+	
 	/** A stack of REMOVE and ADD commands. Used for the UNDO command. */
 	private static LinkedStack<Pair<UserOption, String>> edgeCommandHistory;
 	
@@ -66,6 +69,8 @@ public class Team3Driver {
 		ui = new UserInterface();
 		graph = new MapColoring<>();
 		display = new GraphWindow(graph);
+		
+		performingAnimation = false;
 		
 		
 		ui.displayHello();
@@ -102,6 +107,8 @@ public class Team3Driver {
 		case REMOVE_EDGE: removeEdge(action.second); break;
 		case UNDO_EDGE_REMOVAL: undoEdgeCommand(action.second); break;
 		case CLEAR_GRAPH: graph.clear(); display.recomputeNodePlacements(); break;
+		
+		case TRAVERSE: traverseGraph(action.second); break;
 		
 		case DISPLAY_SOLUTION: displaySolution(action.second); break;
 		
@@ -231,39 +238,79 @@ public class Team3Driver {
 		}
 	}
 	
-	/* UNUSED FOR NOW */
-	private static void displayGraph(String options) {
-		String startNode;
-		boolean depthFirst;
-		
-//		if (options == null || options.isEmpty()) {
-		if (true) { // temporary
-			String depthString = ui.ask("Depth first or breadth first? (d/b): ");
-			
-			do {
-				if (depthString.equalsIgnoreCase("d") || depthString.equalsIgnoreCase("depth")) {
-					depthFirst = true;
-					break;
-				} else if (depthString.equalsIgnoreCase("b") || depthString.equalsIgnoreCase("breadth")) {
-					depthFirst = false;
-					break;
-				}
-			} while (true);
-			
-			
-			startNode = ui.ask("Enter start node: ");
+	private static void traverseGraph(String options) {
+		if (performingAnimation) {
+			System.out.println("Error: traversal animation in progress.");
+			return;
 		}
 		
-		Visitor<String> visitor = new Visitor<String>() {
+		String startNode;
+		
+		do {
+			startNode = ui.ask("Enter start node: ");
+			
+			if (graph.contains(startNode))
+				break;
+			else
+				System.out.println("Node doesn't exist. (note: case matters)");
+		} while (true);
+		
+		
+		final boolean depthFirst;
+		do {
+			String depthString = ui.ask("Depth first or breadth first? (d/b or depth/breadth): ");
+
+			if (depthString.equalsIgnoreCase("d") || depthString.equalsIgnoreCase("depth")) {
+				depthFirst = true;
+				break;
+			} else if (depthString.equalsIgnoreCase("b") || depthString.equalsIgnoreCase("breadth")) {
+				depthFirst = false;
+				break;
+			}
+			
+			System.out.println("Invalid option.");
+		} while (true);
+		
+		
+		
+		final Visitor<String> visitor = new Visitor<String>() {
 			public void visit(String s) {
-				System.out.println(s);
+				display.highlight(s);
+				
+				try {
+					Thread.sleep(300);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		};
 		
-		if (depthFirst)
-			graph.depthFirstTraversal(startNode, visitor);
-		else
-			graph.breadthFirstTraversal(startNode, visitor);
+		final String finalStartNode = startNode;
+		
+		// Perform the animation asynchronously.
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				performingAnimation = true;
+				
+				display.clearHighlights();
+				if (depthFirst)
+					graph.depthFirstTraversal(finalStartNode, visitor);
+				else
+					graph.breadthFirstTraversal(finalStartNode, visitor);
+				
+				
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				display.clearHighlights();
+				
+
+				performingAnimation = false;
+			}
+		}).start();
 	}
 
 	private static void displaySolution(String options) {
